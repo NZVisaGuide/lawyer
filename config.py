@@ -1,4 +1,4 @@
 import os
 
-BOT_TOKEN = os.environ.get("8103642812:AAFBcKTyQMMEtR1I9eJUacG2lX2MMBYr6fA")
-WEBHOOK_URL = os.environ.get("https://nzimmilawyerbot.onrender.com")  # ← URL твоего приложения на Render
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+WEBHOOK_URL = os.getenv("WEBHOOK_URL")
