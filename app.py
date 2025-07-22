@@ -1,6 +1,8 @@
+import os
+import asyncio
 from flask import Flask, request
-from config import BOT_TOKEN, WEBHOOK_URL
-from bot import application
+from bot import application, BOT_TOKEN
+from config import WEBHOOK_URL
 
 app = Flask(__name__)
 
@@ -8,13 +10,18 @@ app = Flask(__name__)
 def index():
     return "Bot is running."
 
-@app.route(f"/{BOT_TOKEN}", methods=["POST"])
+@app.route(f'/{BOT_TOKEN}', methods=['POST'])
 def webhook():
-    update = application.bot._extract_update(request.get_json(force=True))
-    application.process_update(update)
-    return "ok"
+    update = request.get_json(force=True)
+    asyncio.run(application.process_update(update))
+    return "ok", 200
 
-if __name__ == "__main__":
-    application.bot.delete_webhook()
-    application.bot.set_webhook(url=f"{WEBHOOK_URL}/{BOT_TOKEN}")
-    app.run(port=8080)
+# ---- Устанавливаем webhook при запуске ----
+async def setup_webhook():
+    await application.bot.delete_webhook()
+    await application.bot.set_webhook(url=f"{WEBHOOK_URL}/{BOT_TOKEN}")
+
+if __name__ == '__main__':
+    asyncio.run(setup_webhook())
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
