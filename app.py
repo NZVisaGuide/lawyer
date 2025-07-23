@@ -1,31 +1,22 @@
-import os
-import asyncio
-from flask import Flask, request
-from bot import application, BOT_TOKEN
-from config import WEBHOOK_URL
+from flask import Flask
 from stripe_payment import stripe_bp
-
-
+from bot import application
+import asyncio
+import threading
 
 app = Flask(__name__)
 app.register_blueprint(stripe_bp)
 
-@app.route('/')
-def index():
-    return "Bot is running."
+# Запуск Telegram-бота в фоне вручную (async)
+def run_telegram_bot():
+    async def start_bot():
+        await application.initialize()
+        await application.start()
+        await application.updater.start_polling()
+    
+    asyncio.run(start_bot())
 
-@app.route(f'/{BOT_TOKEN}', methods=['POST'])
-def webhook():
-    update = request.get_json(force=True)
-    asyncio.run(application.process_update(update))
-    return "ok", 200
+threading.Thread(target=run_telegram_bot).start()
 
-# ---- Устанавливаем webhook при запуске ----
-async def setup_webhook():
-    await application.bot.delete_webhook()
-    await application.bot.set_webhook(url=f"{WEBHOOK_URL}/{BOT_TOKEN}")
-
-if __name__ == '__main__':
-    asyncio.run(setup_webhook())
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
