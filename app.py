@@ -3,6 +3,10 @@ import asyncio
 from flask import Flask, request
 from bot import application, BOT_TOKEN
 from config import WEBHOOK_URL
+from stripe_payment import stripe_bp
+
+
+app.register_blueprint(stripe_bp)
 
 app = Flask(__name__)
 
