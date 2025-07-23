@@ -1,26 +1,27 @@
-from flask import Flask, request
-from telegram import Update
-from bot import application  # Telegram Application, собранный в bot.py
-import os
 import asyncio
+from flask import Flask, request
+from telegram.ext import Application
+from bot import application  # Это твой telegram Application
+import os
 
 app = Flask(__name__)
 
-BOT_TOKEN = os.environ['BOT_TOKEN']
+# Инициализация Telegram Application
+@app.before_first_request
+def initialize_telegram():
+    loop = asyncio.get_event_loop()
+    if not application._initialized:
+        loop.run_until_complete(application.initialize())
+        print("✅ Telegram Application initialized.")
 
-@app.route(f"/{BOT_TOKEN}", methods=["POST"])
+# Webhook endpoint
+@app.route(f"/{os.environ['BOT_TOKEN']}", methods=["POST"])
 def telegram_webhook():
-    update_data = request.get_json(force=True)
-    update = Update.de_json(update_data, application.bot)
-
-    asyncio.run(application.process_update(update))
-
+    update = request.get_json(force=True)
+    application.update_queue.put_nowait(update)
     return "OK", 200
 
+# Для проверки, что сайт работает
 @app.route("/", methods=["GET"])
 def home():
     return "NZ Immigration Lawyer Bot is running!", 200
-
-# 👇 Добавь этот блок обязательно
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
