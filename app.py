@@ -7,6 +7,10 @@ import threading
 app = Flask(__name__)
 app.register_blueprint(stripe_bp)
 
+@app.route("/")
+def index():
+    return "NZ Immigration Lawyer Bot is running."
+
 # Запуск Telegram-бота в фоне вручную (async)
 def run_telegram_bot():
     async def start_bot():
