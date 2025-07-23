@@ -6,9 +6,9 @@ from config import WEBHOOK_URL
 from stripe_payment import stripe_bp
 
 
-app.register_blueprint(stripe_bp)
 
 app = Flask(__name__)
+app.register_blueprint(stripe_bp)
 
 @app.route('/')
 def index():
