@@ -1,6 +1,5 @@
 from flask import Flask, request
 from telegram import Update
-from telegram.ext import Application
 from bot import application  # Telegram Application, собранный в bot.py
 import os
 import asyncio
@@ -14,7 +13,6 @@ def telegram_webhook():
     update_data = request.get_json(force=True)
     update = Update.de_json(update_data, application.bot)
 
-    # Обработка обновления асинхронно
     asyncio.run(application.process_update(update))
 
     return "OK", 200
@@ -22,3 +20,7 @@ def telegram_webhook():
 @app.route("/", methods=["GET"])
 def home():
     return "NZ Immigration Lawyer Bot is running!", 200
+
+# 👇 Добавь этот блок обязательно
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8080)
